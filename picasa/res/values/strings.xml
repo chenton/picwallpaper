@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="hello">Picasa Wallpaper control</string>
+    <string name="app_name">Picasa</string>
+    <string name="guser">Google user:</string>
+    <string name="gpasswd">Google password:</string><string name="disalbums">Disabled albums</string>
+    
+    <string name="todisalbum">Album to disable:</string>
+    <string name="chooser">--Choose--</string>
+    <string name="addbutton">Add</string>
+    <string name="removebut">Delete</string>
+    <string name="enable">Enable change</string>
+
+</resources>
