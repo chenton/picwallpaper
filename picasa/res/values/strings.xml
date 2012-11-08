@@ -11,5 +11,6 @@
     <string name="addbutton">Add</string>
     <string name="removebut">Delete</string>
     <string name="enable">Enable change</string>
+    <string name="updatebut">Update</string>
 
 </resources>

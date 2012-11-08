@@ -1,5 +1,6 @@
 package es.chent;
 
+import java.text.ChoiceFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,6 +15,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -23,6 +25,12 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 
+
+/**
+ * Main activity for GUI. Enables service and configures access
+ * @author jmfc
+ *
+ */
 public class PicasaActivity extends Activity {
 
 	
@@ -32,7 +40,9 @@ public class PicasaActivity extends Activity {
 	Spinner comboAlbums;
 	Button addButton;
 	Button delButton;
+	Button updButton;
 
+	
 	Switch enableButton;
 
 	ListItemAdapter listAdapter;
@@ -50,6 +60,7 @@ public class PicasaActivity extends Activity {
 	WallPaperChangerService service;
 
 
+	ListItem listedItem;
 	
 	private ServiceConnection mConnection = new ServiceConnection() {
 
@@ -108,20 +119,39 @@ public class PicasaActivity extends Activity {
 		addButton = (Button)findViewById(R.id.button1);
 
 		delButton = (Button)findViewById(R.id.button2);
+		updButton = (Button)findViewById(R.id.button3);
 
 		enableButton = (Switch)findViewById(R.id.switch1);
 
+		disabledAlbums.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+		
+		disabledAlbums.setOnItemClickListener
+		(
+				   new AdapterView.OnItemClickListener() 
+				   {
+				       public void onItemClick(AdapterView adapterView, View view,int position, long arg3)
+				       {
+				          
+				    	   disabledAlbums.setItemChecked(position, true);
+				          
+				          
+				         
+				          Log.d("WWWWW","Position: "+position);
+				       }
+				   }
+				);
+		
 		delButton.setOnClickListener(new View.OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
-	
-				ListItem item;
-				if (disabledAlbums.getSelectedItem()!=null) {
-					item = (ListItem)comboAlbums.getSelectedItem();
-					listAdapter.remove(item);
+				
+				if (disabledAlbums.getCheckedItemPosition()!=-1) {
+					listAdapter.remove(disabledAlbums.getItemAtPosition(disabledAlbums.getCheckedItemPosition()));
+							;
 					
 				}
+				
 			}
 		});
 
@@ -137,6 +167,16 @@ public class PicasaActivity extends Activity {
 					Log.d("MAIN",item.getDescription());
 					}
 				}
+				
+			}
+		});
+
+		updButton.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+			
+				
 				
 			}
 		});
@@ -163,7 +203,7 @@ public class PicasaActivity extends Activity {
 
 
 		listAdapter = new ListItemAdapter(this, 
-				android.R.layout.simple_expandable_list_item_1);
+				android.R.layout.simple_list_item_single_choice);
 
 		comboAdapter = new ListItemSpinnerAdapter(this,android.R.layout.simple_spinner_dropdown_item);
 
