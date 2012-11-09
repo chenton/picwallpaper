@@ -52,8 +52,8 @@ public class ListItem {
 		for (String key : keys) {
 			
 			ListItem listItem = new ListItem();
-			listItem.setDescription(key);
-			listItem.setId(hash.get(key));
+			listItem.setDescription(hash.get(key));
+			listItem.setId(key);
 			
 			list.add(listItem);
 			

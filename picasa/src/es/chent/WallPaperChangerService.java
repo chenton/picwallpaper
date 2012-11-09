@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import android.app.Service;
 import android.content.Context;
@@ -47,7 +48,9 @@ public class WallPaperChangerService extends Service {
 	 
 	 String user;
 	 String password;
-	 
+
+	 boolean restartPending = false;
+	 boolean calculateUrls = false;
 	 int secondsToChangeBackGround;
 	 
 	 Collection<String> disallowedAlbumsIds;
@@ -60,8 +63,26 @@ public class WallPaperChangerService extends Service {
 	 
 	 Map<String, String> albumIds = new HashMap();
 	 
-	 public void initialize() {
+	 private void calculatePhotoUrls() {
+		 
+
+	      for (String albumId : albumIds.keySet()) {
+
+	    	  if (!disallowedAlbumsIds.contains(albumId)) {
+	    		  List<String> albumPhotos = picasa.getAlbumPhotoUrls(albumId);
+	    		  photoUrls.addAll(albumPhotos);
+	    	  }
+	      	
+	      }
+
+	 }
+	 
+	 private void initialize() {
 		
+		 if (user.isEmpty()||password.isEmpty()) {
+			 Log.d(LOG_CAT, user.isEmpty()+ " "+password.isEmpty());
+			 return;
+		 }
 
 	     	if (albumIds == null) {
 	     		albumIds = new HashMap();
@@ -69,7 +90,7 @@ public class WallPaperChangerService extends Service {
 	     	
 		   photoUrls = new ArrayList<String>();
 		   
-		picasa = (PicasaIfz)new PicasaWS("chenton@gmail.com","atq240905", this.getApplicationContext() );
+		picasa = (PicasaIfz)new PicasaWS(user,password, this.getApplicationContext() );
      	
 		if (picasa.isAttached()) {
 			albumIds = picasa.getAlbumsIdsByAlbumTitles();	
@@ -77,19 +98,7 @@ public class WallPaperChangerService extends Service {
 		
      	
      	
-     	
-      for (String albumId : albumIds.values()) {
-
-    	  if (!disallowedAlbumsIds.contains(albumId)) {
-    		  List<String> albumPhotos = picasa.getAlbumPhotoUrls(albumId);
-    		  photoUrls.addAll(albumPhotos);
-    	  }
-    	  
-      	
-
-      	
-      }
-     	
+     	this.calculatePhotoUrls();     	
       photoIndex = 0;
 
       
@@ -134,6 +143,15 @@ public class WallPaperChangerService extends Service {
 	   }
 	
 	
+	   public void saveSettings() {
+		   SharedPreferences settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+	       
+		   settings.edit().putString("user", user);
+		   settings.edit().putString("password", password);
+		   settings.edit().putStringSet("disalloweddAlbums", new HashSet<String>(this.disallowedAlbumsIds));
+		   
+	   }
+	   
 	   public void readSettings() {
 		   
 		// Restore preferences
@@ -142,7 +160,6 @@ public class WallPaperChangerService extends Service {
 	       password = settings.getString("password", "");
 	       disallowedAlbumsIds = settings.getStringSet("disallowedAlbums", new HashSet<String>());
 	       
-	       this.initialized = false;
 	   }
 	   
 	@Override
@@ -185,6 +202,14 @@ public class WallPaperChangerService extends Service {
     			if (!initialized) {
     				return Service.START_NOT_STICKY;
     			}
+    		} else if (restartPending) {
+    			initialize();
+    			restartPending = false;
+    			calculateUrls = false;
+    		} else if (calculateUrls) {
+    			calculatePhotoUrls();
+    			calculateUrls = false;
+    			
     		}
     		
     		photoIndex = random.nextInt(photoUrls.size()-1);

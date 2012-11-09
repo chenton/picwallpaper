@@ -1,6 +1,6 @@
 package es.chent;
 
-import java.text.ChoiceFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,7 +16,6 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -68,10 +67,17 @@ public class PicasaActivity extends Activity {
 			
 			service = ((WallPaperChangerService.WallPaperChangerServiceBinder) binder).getService();
 			service.readSettings();
-			user.setText(service.user);
-			user.setText(service.password);
-			// listAdapter.addAll(ListItem.getListItems(service.albumIds,	 service.disallowedAlbumsIds));
 			
+		
+
+			if (user!=null) {
+				user.setText(service.user);
+					
+			}
+			if (passwd!=null) {
+				passwd.setText(service.password);
+					
+			}
 			
             
 	}
@@ -112,6 +118,12 @@ public class PicasaActivity extends Activity {
 		user = (TextView)findViewById(R.id.editText1);
 		passwd = (TextView)findViewById(R.id.editText2);
 
+		if (service!=null) {
+			user.setText(service.user);
+			passwd.setText(service.password);
+		}
+		
+		
 		disabledAlbums = (ListView)findViewById(R.id.listView1);
 
 		comboAlbums = (Spinner)findViewById(R.id.spinner1);
@@ -147,9 +159,9 @@ public class PicasaActivity extends Activity {
 			public void onClick(View v) {
 				
 				if (disabledAlbums.getCheckedItemPosition()!=-1) {
+				
 					listAdapter.remove(disabledAlbums.getItemAtPosition(disabledAlbums.getCheckedItemPosition()));
-							;
-					
+							
 				}
 				
 			}
@@ -176,8 +188,30 @@ public class PicasaActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 			
+				if (service!=null) {
+					
+					service.disallowedAlbumsIds.clear();
+					int size = disabledAlbums.getCount();
+					for (int i=0;i<size;i++) {						
+						ListItem item = (ListItem) disabledAlbums.getItemAtPosition(i);
+						service.disallowedAlbumsIds.add(item.getId());
+					
+					}
+					
+					service.calculateUrls=true;
+					
+					if ((!user.getText().toString().equals(service.user))||
+					(!passwd.getText().toString().equals(service.password))) {
+						service.user = user.getText().toString();
+						service.password = passwd.getText().toString();
 				
-				
+						service.restartPending = true;
+						
+					}
+					
+					service.saveSettings();
+					
+				}				
 			}
 		});
 
@@ -185,8 +219,7 @@ public class PicasaActivity extends Activity {
 
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				// TODO Auto-generated method stub
-
+				
 				if (service == null) {
 					return;
 				}
@@ -219,8 +252,11 @@ public class PicasaActivity extends Activity {
 	                        
 	                        String action = intent.getAction();
 	                        if (action.equals(WallPaperChangerService.INITIALIZE_INTENT)) {
+	                        	listAdapter.clear();
+	                        	comboAdapter.clear();
 	                        	listAdapter.addAll(ListItem.getListItems(service.albumIds,service.disallowedAlbumsIds));
 	                        	comboAdapter.addAll(ListItem.getListItems(service.albumIds));
+	                        	
 	                    		
 	                        }
 	                }

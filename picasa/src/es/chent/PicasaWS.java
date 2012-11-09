@@ -97,7 +97,7 @@ public class PicasaWS extends DefaultHandler implements PicasaIfz {
 
 		attachedToGoogle = false;
 		
-		Log.d(LOG_TAG, "Connecting picasa for user " + user);
+		Log.d(LOG_TAG, "Connecting picasa for user: " + user+"  password: "+passwd);
 		
 		String url = "https://www.google.com/accounts/ClientLogin";
 		DefaultHttpClient httpclient = new DefaultHttpClient();
@@ -290,6 +290,7 @@ public class PicasaWS extends DefaultHandler implements PicasaIfz {
 		Log.d(LOG_TAG, "AddPicture, size: " + picture_data.length + ", album: "
 				+ album_name);
 
+		//NOT WORKING, hash CHANGED!!!!
 		Map<String, String> lookup = getAlbumsIdsByAlbumTitles();
 		String album_id = lookup.get(album_name);
 
@@ -441,8 +442,8 @@ public class PicasaWS extends DefaultHandler implements PicasaIfz {
 			if (ENTRY_TAG.equals(qName.trim())) {
 				inEntryTag = false;
 				if (currentEntryID != null && currentEntryTitle != null) {
-					albumsIdsByAlbumTitles.put(currentEntryTitle,
-							currentEntryID);
+					albumsIdsByAlbumTitles.put(currentEntryID,
+							currentEntryTitle);
 				}
 			}
 		}
